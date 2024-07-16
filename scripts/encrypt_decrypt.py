@@ -241,4 +241,4 @@ if __name__ == "__main__":
         print(f"An error occurred: {str(e)}")
 
     # Print a message to show the script has finished
-    print("Script finished")
+    print("Script finished ")
