@@ -1,147 +1,108 @@
 #!/bin/bash
 
 # Default encryption algorithm
-DEFAULT_ALGORITHM="aes-256-cbc"
+DEFAULT_ALGORITHM="AES"
+
+# Function to check if required dependencies are installed
+check_dependencies() {
+    dependencies=("python3" "pip3")
+
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            echo "$dep is not installed. Please install it before running this script."
+            exit 1
+        fi
+    done
+
+    # Check if the cryptography package is installed
+    if ! python3 -c "import cryptography" &> /dev/null; then
+        echo "The Python 'cryptography' package is not installed. Installing..."
+        pip3 install cryptography
+    fi
+}
 
 # Function to encrypt a file
 encrypt_file() {
-    local file="$1"           # The path to the file to be encrypted
-    local password="$2"       # The password to use for encryption
-    local algorithm="${3:-$DEFAULT_ALGORITHM}"  # The encryption algorithm to use, defaulting to aes-256-cbc if not provided
-    
-    if [[ ! -f "$file" ]]; then  # file existence check
+    local file="$1"
+    local password="$2"
+    local algorithm="${3:-$DEFAULT_ALGORITHM}"
+
+    if [[ ! -f "$file" ]]; then
         echo "Error: File '$file' not found!"
         return 1
     fi
-    
-    openssl enc -"$algorithm" -pbkdf2 -salt -in "$file" -out "${file}.enc" -pass pass:"$password" # Password-Based Key Derivation Function 2
-    if [[ $? -eq 0 ]]; then
-        echo "File encrypted successfully: ${file}.enc" # Print/echo a success message with the name of the encrypted file
+
+    if [[ "$algorithm" == "RSA" ]]; then
+        # Generate RSA key pair
+        python3 scripts/encrypt_decrypt.py generate_rsa_key_pair "$password"
+        public_key="public_key.pem"
+        private_key="private_key.pem"
+        echo "RSA key pair generated."
     else
-        echo "Encryption failed!"
-        return 1
+        public_key="$password"  # For other algorithms, use password directly as key
+        private_key="$password"
     fi
+
+    python3 scripts/encrypt_decrypt.py encrypt "$file" "$public_key" "$algorithm"
 }
 
 # Function to decrypt a file
 decrypt_file() {
-    local file="$1"           # The path to the file to be decrypted
-    local password="$2"       # The password to use for decryption
-    local algorithm="${3:-$DEFAULT_ALGORITHM}"  # The encryption algorithm to use, defaulting to aes-256-cbc if not provided
-    
-    if [[ ! -f "$file" ]]; then  # file existence check
+    local file="$1"
+    local password="$2"
+    local algorithm="${3:-$DEFAULT_ALGORITHM}"
+
+    if [[ ! -f "$file" ]]; then
         echo "Error: File '$file' not found!"
         return 1
     fi
 
-    if [[ "$file" != *.enc ]]; then # file extension check
+    if [[ "$file" != *.enc ]]; then
         echo "Error: The file to be decrypted must have a '.enc' extension!"
         return 1
     fi
 
-    openssl enc -d -"$algorithm" -pbkdf2 -in "$file" -out "${file%.enc}" -pass pass:"$password" # Decrypt the file using the specified algorithm and password, with PBKDF2 for key derivation
-    if [[ $? -eq 0 ]]; then
-        echo "File decrypted successfully: ${file%.enc}" # Print a success message with the name of the decrypted file
+    if [[ "$algorithm" == "RSA" ]]; then
+        private_key="private_key.pem"
     else
-        echo "Decryption failed!"
-        return 1
+        private_key="$password"
     fi
+
+    python3 scripts/encrypt_decrypt.py decrypt "$file" "$private_key" "$algorithm"
+}
+
+# Function to generate RSA key pair (for demonstration)
+generate_rsa_key_pair() {
+    local password="$1"
+    python3 scripts/encrypt_decrypt.py generate_rsa_key_pair "$password"
+    echo "RSA key pair generated."
 }
 
 # Main script logic
-case $1 in
+case "$1" in
     encrypt)
         if [[ $# -lt 3 ]]; then
-            echo "Usage: $0 encrypt filename password [algorithm]"
+            echo "Usage: $0 encrypt <filename> <password> [algorithm]"
             exit 1
         fi
-        encrypt_file "$2" "$3" "$4" # Call encrypt_file function with the provided arguments: filename, password, and algorithm->(optional)
+        encrypt_file "$2" "$3" "$4"
         ;;
-        
     decrypt)
         if [[ $# -lt 3 ]]; then
-            echo "Usage: $0 decrypt filename password [algorithm]"
+            echo "Usage: $0 decrypt <filename> <password> [algorithm]"
             exit 1
         fi
-        decrypt_file "$2" "$3" "$4" # Call decrypt_file function with the provided arguments: filename, password, and algorithm->(optional)
+        decrypt_file "$2" "$3" "$4"
+        ;;
+    generate_rsa_key_pair)  # Added for demonstration
+        if [[ $# -ne 2 ]]; then
+            echo "Usage: $0 generate_rsa_key_pair <password>"
+            exit 1
+        fi
+        generate_rsa_key_pair "$2"
         ;;
     *)
-        echo "Usage: $0 {encrypt|decrypt} filename password [algorithm]" # Print usage instructions if the command is not recognized
-        exit 1
-        ;;
-esac
-
-#!/bin/bash
-
-# Default encryption algorithm
-DEFAULT_ALGORITHM="aes-256-cbc"
-
-# Function to encrypt a file
-encrypt_file() {
-    local file="$1"           # The path to the file to be encrypted
-    local password="$2"       # The password to use for encryption
-    local algorithm="${3:-$DEFAULT_ALGORITHM}"  # The encryption algorithm to use, defaulting to aes-256-cbc if not provided
-    
-    if [[ ! -f "$file" ]]; then  # file existence check
-        echo "Error: File '$file' not found!"
-        return 1
-    fi
-    
-    openssl enc -"$algorithm" -pbkdf2 -salt -in "$file" -out "${file}.enc" -pass pass:"$password" # Password-Based Key Derivation Function 2
-    if [[ $? -eq 0 ]]; then
-        echo "File encrypted successfully: ${file}.enc" # Print/echo a success message with the name of the encrypted file
-        rm "$file" 
-        echo "Original file deleted."
-    else
-        echo "Encryption failed!"
-        return 1
-    fi
-}
-
-# Function to decrypt a file
-decrypt_file() {
-    local file="$1"           # The path to the file to be decrypted
-    local password="$2"       # The password to use for decryption
-    local algorithm="${3:-$DEFAULT_ALGORITHM}"  # The encryption algorithm to use, defaulting to aes-256-cbc if not provided
-    
-    if [[ ! -f "$file" ]]; then  # file existence check
-        echo "Error: File '$file' not found!"
-        return 1
-    fi
-
-    if [[ "$file" != *.enc ]]; then # file extension check
-        echo "Error: The file to be decrypted must have a '.enc' extension!"
-        return 1
-    fi
-
-    openssl enc -d -"$algorithm" -pbkdf2 -in "$file" -out "${file%.enc}" -pass pass:"$password" # Decrypt the file using the specified algorithm and password, with PBKDF2 for key derivation
-    if [[ $? -eq 0 ]]; then
-        echo "File decrypted successfully: ${file%.enc}" # Print a success message with the name of the decrypted file
-    else
-        echo "Decryption failed!"
-        return 1
-    fi
-}
-
-# Main script logic
-case $1 in
-    encrypt)
-        if [[ $# -lt 3 ]]; then
-            echo "Usage: $0 encrypt filename password [algorithm]"
-            exit 1
-        fi
-        encrypt_file "$2" "$3" "$4" # Call encrypt_file function with the provided arguments: filename, password, and algorithm->(optional)
-        ;;
-        
-    decrypt)
-        if [[ $# -lt 3 ]]; then
-            echo "Usage: $0 decrypt filename password [algorithm]"
-            exit 1
-        fi
-        decrypt_file "$2" "$3" "$4" # Call decrypt_file function with the provided arguments: filename, password, and algorithm->(optional)
-        ;;
-    *)
-        echo "Usage: $0 {encrypt|decrypt} filename password [algorithm]" # Print usage instructions if the command is not recognized
+        echo "Usage: $0 {encrypt|decrypt|generate_rsa_key_pair} <filename> <password> [algorithm]"
         exit 1
         ;;
 esac
