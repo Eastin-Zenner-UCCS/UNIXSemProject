@@ -1,9 +1,0 @@
-Sorry about the weird naming, I was testing a lot of stuff and got tired and didn't feel like renaming them due to them working together but ill explain some stuff real quick
-
-in the dist folder is a general exe file called "SecureFile.exe" this is just the basic program
-
-The file called securefile.py is the main python code for all the gui and algorithm stuff I added from Nanbons code
-
-"secure.sh" is there so it can run some commands on the Linux terminal, i only made like 1 so idk if we want more or not.
-
-the rest is just other stuff, some important some not.

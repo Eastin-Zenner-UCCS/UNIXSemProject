@@ -79,6 +79,19 @@ generate_rsa_key_pair() {
   echo "RSA key pair generated."
 }
 
+#runs exe file
+runexe()
+{
+  local exe="SecureFile.exe"
+
+  if [[ ! -f "$exe" ]]; then
+    echo "Error: File '$exe' not found!"
+    return 1
+  fi
+  chmod +x "$exe"
+  ./"$exe"
+}
+
 # Main script logic
 main() {
   check_dependencies
@@ -104,6 +117,9 @@ main() {
         exit 1
       fi
       generate_rsa_key_pair "$2"
+      ;;
+    run_exe)
+      runexe
       ;;
     *)
       echo "Usage: $0 {encrypt|decrypt|generate_rsa_key_pair} <filename> <password> [algorithm]"
