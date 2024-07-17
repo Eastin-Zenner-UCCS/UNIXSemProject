@@ -95,6 +95,9 @@ python securefile.py
 For more assistance, please open an issue on our GitHub repository.
 
 
+THIS IS OUR GITHUB LINK: https://github.com/Eastin-Zenner-UCCS/UNIXSemProject
+
+
 
 
 
