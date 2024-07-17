@@ -50,7 +50,7 @@ The general syntax for using SecureFile via CLI is:
 ```
 ### Encrypting a File
 
-To encrypt a file named `document.txt` with the password `"mySecretPass"`:
+To encrypt a file named ` document.txt` with the password `"mySecretPass"`:
 
 ```bash
 ./secure.sh encrypt document.txt mySecretPass
