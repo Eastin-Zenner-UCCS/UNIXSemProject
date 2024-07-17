@@ -45,7 +45,7 @@ Follow these steps to set up SecureFile:
 The general syntax for using SecureFile via CLI is:
 
    ```bash
-    ./secure.sh <encrypt/decrypt> <file_path> <password>
+    ./helper_script.sh <encrypt/decrypt> <file_path> <password>
     
 ```
 ### Encrypting a File
@@ -53,7 +53,7 @@ The general syntax for using SecureFile via CLI is:
 To encrypt a file named ` document.txt` with the password `"mySecretPass"`:
 
 ```bash
-./secure.sh encrypt document.txt mySecretPass
+./helper_script.sh encrypt document.txt mySecretPass
 ```
 This will create an encrypted file named `document.txt.enc`.
 
@@ -62,7 +62,7 @@ This will create an encrypted file named `document.txt.enc`.
 To decrypt the file `document.txt.enc` using the same password, you can use the following bash command:
 
 ```bash
-./secure.sh decrypt document.txt.enc mySecretPass
+./helper_script.sh decrypt document.txt.enc mySecretPass
 ```
 ## Graphical User Interface (GUI)  <a name="graphical-user-interface-gui"></a>
 
