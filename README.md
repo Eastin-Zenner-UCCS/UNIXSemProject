@@ -19,10 +19,10 @@ Follow these steps to set up SecureFile:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/username/securefile.git
-   cd securefile
+   git clone https://github.com/Eastin-Zenner-UCCS/UNIXSemProject
+   cd GUI
 
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment (optional):
     ```bash
     python3 -m venv venv
     source venv/bin/activate  # On macOS/Linux
@@ -31,7 +31,12 @@ Follow these steps to set up SecureFile:
 3. Install dependencies:
     ```bash
     python3 -m pip install --upgrade pip
+    sudo apt-get install python3-tk
     pip install -r requirements.txt
+
+4. Navigate to directory
+    ```bash
+    To use GUI, change directory using cd gui/'GUI CODE'
 
 ## Command-Line Interface (CLI) <a name="command-line-interface-cli"></a>
 
